@@ -1,0 +1,10 @@
+.env
+estado.json
+bot_deriv.log
+*.log
+__pycache__/
+*.pyc
+*.pyo
+.vscode/
+.idea/
+.claude/
