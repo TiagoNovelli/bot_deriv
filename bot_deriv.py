@@ -66,7 +66,7 @@ SYMBOL = {
 
 ALVOS = [
     # M15
-    ("EURGBP", 15), ("EURUSD", 15), ("EURJPY", 15), ("USDJPY", 15),
+    ("EURGBP", 15), ("EURUSD", 15), ("EURJPY", 15),
     # M30 — exclusivo Deriv (IQ Option não suporta)
     ("EURUSD", 30), ("EURJPY", 30), ("USDJPY", 30),
     # M5
@@ -88,13 +88,6 @@ REGRAS = [
         "check": lambda i: (i["padrao"] == "NUVEM-NEGRA"
                             and i["sessao"] == "Asia"
                             and i["extremo_ema50"] == 1),
-    },
-    {
-        "nome": "USDJPY M15 ENGOLFO-BAIXA NY ema50=1 bb=0", "par": "USDJPY", "tf": 15, "nivel": 1,
-        "check": lambda i: (i["padrao"] == "ENGOLFO-BAIXA"
-                            and i["sessao"] == "NY"
-                            and i["extremo_ema50"] == 1
-                            and i["bb_extremo"] == 0),
     },
     {
         "nome": "EURUSD M15 DOJI-EXTREMO Ásia stoch=1", "par": "EURUSD", "tf": 15, "nivel": 1,
