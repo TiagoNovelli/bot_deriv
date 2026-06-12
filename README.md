@@ -1,42 +1,27 @@
-# bot_deriv — Bot de Trading para Deriv
+# bot_deriv — Bot de Opções Binárias para Deriv
 
-Versão do bot de opções binárias adaptada para a plataforma **Deriv** (antiga Binary.com).
+Bot assíncrono para a plataforma **Deriv** (ex-Binary.com), com 44 regras validadas em walk-forward 2019–2025.
 
-Usa as mesmas estratégias validadas estatisticamente do [bot IQ Option](../bot/), com as seguintes diferenças:
-
-| | IQ Option | Deriv |
-|---|---|---|
-| API | Unofficial (iqoptionapi) | Oficial WebSocket |
-| Autenticação | Email + senha | Token OAuth |
-| Volume | Real (forex) | Sempre 0 (forex) |
-| Sinais DNC-RSI+VOL | Sim | Não (sem volume) |
-| OTC 24/7 | Sim | Não |
-| Payout | Fixo ~82% | Variável — verificado antes de cada trade |
-| Regulação | Questionável | MGA (Malta), Labuan, Vanuatu |
+Irmão do [bot IQ Option](../bot/) — mesmas estratégias, API diferente. Suporta **M30, H1 e H4** que a IQ Option não permite via bot.
 
 ---
 
 ## Instalação
 
 ```bash
+git clone git@github.com:TiagoNovelli/bot_deriv.git
 cd bot_deriv
 pip install -r requirements.txt
 cp .env.example .env
 ```
 
-### Configurar token Deriv
+Edite o `.env`:
 
-1. Acesse [app.deriv.com/account/api-token](https://app.deriv.com/account/api-token)
-2. Crie um token com permissões **Read** e **Trade**
-3. Copie o token para o `.env`:
-
+```env
+DERIV_TOKEN=seu_token_aqui   # app.deriv.com/account/api-token → Read + Trade
+DERIV_APP_ID=1089            # app público (ou crie o seu em developers.deriv.com)
+MODO=DEMO                    # DEMO ou REAL
 ```
-DERIV_TOKEN=seu_token_aqui
-DERIV_APP_ID=1089
-MODO=DEMO
-```
-
-Para operar conta real: `MODO=REAL` (e use o token da conta real).
 
 ---
 
@@ -46,62 +31,72 @@ Para operar conta real: `MODO=REAL` (e use o token da conta real).
 python3 bot_deriv.py
 ```
 
----
-
-## Como funciona
-
-- Loop a cada 10s verificando 12 pares/timeframes (M1, M5, M15)
-- **19 regras** ativas (excluindo DNC-RSI+VOL que depende de volume)
-- Antes de cada trade: verifica payout via Proposal API — só opera se payout ≥ 75%
-- Aposta proporcional: 1.67% da banca atual
-- Soros-Gale 2 níveis com estado persistido em `estado.json`
-- Stop-loss diário: 5% da banca no início do dia
-- Reconexão automática em caso de queda do WebSocket
+O bot conecta via WebSocket, monitora 22 pares/timeframes e opera automaticamente quando um sinal é confirmado.
 
 ---
 
-## Regras ativas (19)
+## Sinais — 44 regras, ~351 ops/ano, WR médio 64.5%
 
-Todas validadas com walk-forward por ano no bot IQ Option. Excluídas as que dependem de volume real (DNC-RSI+VOL) e os pares OTC.
+| TF | Regras | Ops/ano | WR médio |
+|----|--------|---------|----------|
+| M1 | 8 | 113 | 62.8% |
+| M5 | 6 | 48 | 65.7% |
+| M15 | 3 | 31 | 63.7% |
+| M30 | 6 | 36 | 67.2% |
+| H1 | 13 | 70 | 66.6% |
+| H4 | 8 | 54 | 63.7% |
 
-| Timeframe | Par | Sinal | Sessão | WR histórico |
-|-----------|-----|-------|--------|-------------|
-| M15 | EURGBP | NUVEM-NEGRA | Ásia | 64.5% |
-| M15 | USDJPY | ENGOLFO-BAIXA | NY | 58.6% |
-| M15 | EURUSD | DOJI-EXTREMO | Ásia | 62.3% |
-| M15 | EURJPY | DOJI-EXTREMO | Ásia | 63.8% |
-| M5  | EURGBP | TRESCORVOS | Londres | 67.1% |
-| M5  | EURUSD | ENGOLFO-ALTA | Ásia | 62.6% |
-| M5  | EURUSD | DIV-RSI-BULL | Londres-abertura | 58.6% |
-| M5  | EURUSD | PDV-S4-RSI | NY-abertura | 56.4% |
-| M5  | EURJPY | PIN-CALL | Ásia | 62.8% |
-| M5  | EURJPY | TRESSOLDADOS | Londres | 63.9% |
-| M5  | EURJPY | HARAMI-ALTA | Londres | 61.6% |
-| M1  | EURGBP | NUVEM-NEGRA | Londres | 59.7% |
-| M1  | EURUSD | DIV-RSI-BULL | NY-abertura | 60.8% |
-| M1  | EURJPY | NUVEM-NEGRA | Ásia | 63.6% |
-| M1  | EURJPY | HARAMI-BAIXA | NY-abertura | 60.3% |
-| M1  | USDJPY | NUVEM-NEGRA | Londres | 72.9% |
-| M1  | USDJPY | NUVEM-NEGRA | Londres | 63.1% |
-| M1  | GBPUSD | DIV-RSI-BEAR | Londres-abertura | 65.8% |
-| M1  | GBPUSD | NUVEM-NEGRA | NY-abertura | 59.9% |
+Break-even com payout 75%: **57.1%**. Todos os sinais acima disso.
+
+Destaques:
+- USDJPY H1 DIV-RSI-BULL Ásia bb=1 → **77.1% WR, 5/5 anos**
+- USDJPY M30 ENGOLFO-BAIXA Londres-abertura → **71.0% WR**
+- USDJPY H4 PIN-CALL Ásia macd=0 → **63.8% WR, 7/7 anos** (maior estabilidade)
 
 ---
 
-## Sobre o payout variável
+## Gestão — Soros-Gale Proporcional
 
-Na Deriv o payout não é fixo como na IQ Option. Antes de cada trade, o bot faz uma requisição `proposal` e verifica se o payout líquido está acima de `PAYOUT_MIN` (padrão: 75%). Se estiver abaixo, o trade é ignorado.
+- **Aposta base**: 1.67% da banca atual
+- **Stop-loss diário**: 5% da banca do dia
+- **Recuperação**: até 2 níveis (só em sinais de alta confiança)
+- **Payout mínimo**: 75% — verificado via Proposal API antes de cada trade
+- **Estado persistido**: `estado.json` — reinício no mesmo dia retoma de onde parou
 
-Break-even por payout:
-- Payout 82% → WR mínimo 54.9%
-- Payout 75% → WR mínimo 57.1%
-- Payout 70% → WR mínimo 58.8%
+---
+
+## Diferenças vs IQ Option
+
+| | IQ Option | Deriv |
+|---|---|---|
+| API | Unofficial | Oficial WebSocket |
+| Auth | Email + senha | Token OAuth |
+| M30 / H1 / H4 | ✗ | ✓ |
+| Sinais de volume | ✓ (~350 ops/ano a mais) | ✗ (volume = 0) |
+| Payout | Fixo ~82% | Variável, verificado por trade |
+| Ops/ano | ~835 | ~351 |
+| WR médio | ~62% | ~64.5% |
+
+---
+
+## Estrutura
+
+```
+bot_deriv/
+├── bot_deriv.py    ← bot principal
+├── sinais.py       ← detecção de padrões (NUVEM-NEGRA, DIV-RSI, PDV, etc.)
+├── requirements.txt
+├── .env.example
+└── CLAUDE.md       ← contexto completo para desenvolvimento
+```
 
 ---
 
 ## Dependências
 
-- `websockets` — WebSocket async para a Deriv API
-- `ta` — indicadores técnicos (RSI, Stoch, MACD, BB, EMA)
-- `pandas`, `numpy` — séries de dados
-- `python-dotenv` — credenciais via .env
+```
+websockets    — WebSocket async (Deriv API)
+ta            — indicadores técnicos (RSI, Stoch, MACD, BB, EMA)
+pandas numpy  — dados
+python-dotenv — .env
+```
