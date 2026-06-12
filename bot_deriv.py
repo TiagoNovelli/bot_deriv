@@ -76,7 +76,7 @@ ALVOS = [
     # H1 — exclusivo Deriv
     ("EURGBP", 60), ("EURUSD", 60), ("EURJPY", 60), ("USDJPY", 60), ("GBPUSD", 60),
     # H4 — exclusivo Deriv
-    ("EURUSD", 240), ("EURJPY", 240), ("USDJPY", 240),
+    ("EURUSD", 240), ("EURJPY", 240), ("USDJPY", 240), ("GBPUSD", 240),
 ]
 
 # ── Regras confirmadas (sem DNC-RSI+VOL — depende de volume) ─────────────────
@@ -300,6 +300,63 @@ REGRAS = [
         "nome": "EURUSD H4 TRESCORVOS Ásia", "par": "EURUSD", "tf": 240, "nivel": 1,
         "check": lambda i: (i["padrao"] == "TRESCORVOS"
                             and i["sessao"] == "Asia"),
+    },
+    # ── H1 novos — busca ampla 2019-2025 ─────────────────────────────────────
+    {
+        "nome": "GBPUSD H1 DIV-RSI-BULL NY", "par": "GBPUSD", "tf": 60, "nivel": 2,
+        "check": lambda i: (i["sinal"] == "DIV-RSI-BULL"
+                            and i["sessao"] == "NY"),
+    },
+    {
+        "nome": "USDJPY H1 DIV-RSI-BULL Ásia bb=1", "par": "USDJPY", "tf": 60, "nivel": 2,
+        "check": lambda i: (i["sinal"] == "DIV-RSI-BULL"
+                            and i["sessao"] == "Asia"
+                            and i["bb_extremo"] == 1),
+    },
+    {
+        "nome": "EURUSD H1 MORNING-STAR Londres-abertura bb=0", "par": "EURUSD", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "MORNING-STAR"
+                            and i["sessao"] == "Londres-abertura"
+                            and i["bb_extremo"] == 0),
+    },
+    {
+        "nome": "EURUSD H1 DIV-RSI-BEAR Ásia ema50=1", "par": "EURUSD", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "DIV-RSI-BEAR"
+                            and i["sessao"] == "Asia"
+                            and i["extremo_ema50"] == 1),
+    },
+    {
+        "nome": "USDJPY H1 PDV-S4-RSI Londres", "par": "USDJPY", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S4-RSI"
+                            and i["sessao"] == "Londres"),
+    },
+    # ── H4 novos — busca ampla 2019-2025 ─────────────────────────────────────
+    {
+        "nome": "GBPUSD H4 DIV-RSI-BULL Ásia", "par": "GBPUSD", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "DIV-RSI-BULL"
+                            and i["sessao"] == "Asia"),
+    },
+    {
+        "nome": "EURUSD H4 DIV-RSI-BEAR Londres-abertura", "par": "EURUSD", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "DIV-RSI-BEAR"
+                            and i["sessao"] == "Londres-abertura"),
+    },
+    {
+        "nome": "USDJPY H4 PDV-S4-RSI Londres-abertura macd=0", "par": "USDJPY", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S4-RSI"
+                            and i["sessao"] == "Londres-abertura"
+                            and i["macd_confirmado"] == 0),
+    },
+    {
+        "nome": "EURJPY H4 PDV-S4-RSI NY-abertura", "par": "EURJPY", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S4-RSI"
+                            and i["sessao"] == "NY-abertura"),
+    },
+    {
+        "nome": "USDJPY H4 PIN-CALL Ásia macd=0", "par": "USDJPY", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PIN-CALL"
+                            and i["sessao"] == "Asia"
+                            and i["macd_confirmado"] == 0),
     },
 ]
 
