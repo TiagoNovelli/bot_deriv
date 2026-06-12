@@ -51,7 +51,7 @@ DEMO_MODE = os.environ.get("MODO", "DEMO").upper() == "DEMO"
 
 WS_ENDPOINT = f"wss://ws.binaryws.com/websockets/v3?app_id={APP_ID}"
 
-GRANULARITY = {1: 60, 5: 300, 15: 900, 30: 1800}
+GRANULARITY = {1: 60, 5: 300, 15: 900, 30: 1800, 60: 3600}
 
 # Mapeamento par → símbolo Deriv (frx = forex)
 SYMBOL = {
@@ -67,10 +67,14 @@ SYMBOL = {
 ALVOS = [
     # M15
     ("EURGBP", 15), ("EURUSD", 15), ("EURJPY", 15), ("USDJPY", 15),
+    # M30 — exclusivo Deriv (IQ Option não suporta)
+    ("EURUSD", 30), ("EURJPY", 30), ("USDJPY", 30),
     # M5
     ("EURGBP",  5), ("EURUSD",  5), ("EURJPY",  5),
     # M1
     ("EURGBP",  1), ("EURUSD",  1), ("EURJPY",  1), ("USDJPY",  1), ("GBPUSD",  1),
+    # H1 — exclusivo Deriv
+    ("EURJPY", 60), ("USDJPY", 60),
 ]
 
 # ── Regras confirmadas (sem DNC-RSI+VOL — depende de volume) ─────────────────
@@ -202,6 +206,54 @@ REGRAS = [
         "check": lambda i: (i["padrao"] == "NUVEM-NEGRA"
                             and i["sessao"] == "NY-abertura"
                             and i["stoch_extremo"] == 1),
+    },
+    # ── M30 — exclusivo Deriv (IQ Option não suporta) ─────────────────────────
+    # Walk-forward 2019-2025, break-even 54.9%
+    {
+        "nome": "USDJPY M30 ENGOLFO-BAIXA Londres-abertura stoch_virando=0", "par": "USDJPY", "tf": 30, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "ENGOLFO-BAIXA"
+                            and i["sessao"] == "Londres-abertura"
+                            and i["stoch_virando"] == 0),
+    },
+    {
+        "nome": "USDJPY M30 TRESSOLDADOS NY-abertura ema50=1", "par": "USDJPY", "tf": 30, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESSOLDADOS"
+                            and i["sessao"] == "NY-abertura"
+                            and i["extremo_ema50"] == 1),
+    },
+    {
+        "nome": "EURJPY M30 TRESSOLDADOS NY ema50=1", "par": "EURJPY", "tf": 30, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESSOLDADOS"
+                            and i["sessao"] == "NY"
+                            and i["extremo_ema50"] == 1),
+    },
+    {
+        "nome": "EURJPY M30 TRESSOLDADOS NY", "par": "EURJPY", "tf": 30, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESSOLDADOS"
+                            and i["sessao"] == "NY"),
+    },
+    {
+        "nome": "EURJPY M30 MORNING-STAR Londres", "par": "EURJPY", "tf": 30, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "MORNING-STAR"
+                            and i["sessao"] == "Londres"),
+    },
+    {
+        "nome": "EURUSD M30 TRESCORVOS Londres-abertura stoch=0", "par": "EURUSD", "tf": 30, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESCORVOS"
+                            and i["sessao"] == "Londres-abertura"
+                            and i["stoch_extremo"] == 0),
+    },
+    # ── H1 — exclusivo Deriv ──────────────────────────────────────────────────
+    {
+        "nome": "EURJPY H1 ENGOLFO-BAIXA Ásia", "par": "EURJPY", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "ENGOLFO-BAIXA"
+                            and i["sessao"] == "Asia"),
+    },
+    {
+        "nome": "USDJPY H1 MORNING-STAR Ásia stoch=0", "par": "USDJPY", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "MORNING-STAR"
+                            and i["sessao"] == "Asia"
+                            and i["stoch_extremo"] == 0),
     },
 ]
 
