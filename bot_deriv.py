@@ -70,7 +70,7 @@ ALVOS = [
     # M30 — exclusivo Deriv (IQ Option não suporta)
     ("EURUSD", 30), ("EURJPY", 30), ("USDJPY", 30),
     # M5
-    ("EURGBP",  5), ("EURUSD",  5), ("EURJPY",  5),
+    ("EURGBP",  5), ("EURUSD",  5), ("EURJPY",  5), ("GBPUSD",  5), ("USDJPY",  5),
     # M1
     ("EURGBP",  1), ("EURUSD",  1), ("EURJPY",  1), ("USDJPY",  1), ("GBPUSD",  1),
     # H1 — exclusivo Deriv
@@ -108,52 +108,41 @@ REGRAS = [
                             and i["sessao"] == "Asia"
                             and i["stoch_extremo"] == 1),
     },
-    # ── M5 ───────────────────────────────────────────────────────────────────
+    # ── M5 — validado walk-forward 2019-2025 (dados de ticks Dukascopy) ─────────
     {
-        "nome": "EURGBP M5 TRESCORVOS Londres bb=0 stoch=1", "par": "EURGBP", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["padrao"] == "TRESCORVOS"
+        "nome": "EURGBP M5 PDV-S1 Londres stoch_virando=1", "par": "EURGBP", "tf": 5, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S1"
                             and i["sessao"] == "Londres"
-                            and i["bb_extremo"] == 0
-                            and i["stoch_extremo"] == 1),
+                            and i["stoch_virando"] == 1),
     },
     {
-        "nome": "EURUSD M5 ENGOLFO-ALTA Ásia stoch=1", "par": "EURUSD", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["padrao"] == "ENGOLFO-ALTA"
-                            and i["sessao"] == "Asia"
-                            and i["stoch_extremo"] == 1),
-    },
-    {
-        "nome": "EURUSD M5 DIV-RSI-BULL Londres-abertura macd=1", "par": "EURUSD", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["sinal"] == "DIV-RSI-BULL"
-                            and i["sessao"] == "Londres-abertura"
-                            and i["macd_confirmado"] == 1),
-    },
-    {
-        "nome": "EURUSD M5 PDV-S4-RSI NY-abertura macd=0 stoch=0", "par": "EURUSD", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["sinal"] == "PDV-S4-RSI"
+        "nome": "EURUSD M5 PDV-S1 NY-abertura stoch=1", "par": "EURUSD", "tf": 5, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S1"
                             and i["sessao"] == "NY-abertura"
-                            and i["macd_confirmado"] == 0
-                            and i["stoch_virando"] == 0),
-    },
-    {
-        "nome": "EURJPY M5 PIN-CALL Ásia ema50=0 bb=1", "par": "EURJPY", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["sinal"] == "PIN-CALL"
-                            and i["sessao"] == "Asia"
-                            and i["extremo_ema50"] == 0
-                            and i["bb_extremo"] == 1),
-    },
-    {
-        "nome": "EURJPY M5 TRESSOLDADOS Londres stoch=1", "par": "EURJPY", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["padrao"] == "TRESSOLDADOS"
-                            and i["sessao"] == "Londres"
                             and i["stoch_extremo"] == 1),
     },
     {
-        "nome": "EURJPY M5 HARAMI-ALTA Londres ema50=1 stoch=0", "par": "EURJPY", "tf": 5, "nivel": 1,
-        "check": lambda i: (i["padrao"] == "HARAMI-ALTA"
-                            and i["sessao"] == "Londres"
-                            and i["extremo_ema50"] == 1
+        "nome": "EURUSD M5 PERFURACAO-ALTA NY bb=0", "par": "EURUSD", "tf": 5, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "PERFURACAO-ALTA"
+                            and i["sessao"] == "NY"
+                            and i["bb_extremo"] == 0),
+    },
+    {
+        "nome": "EURJPY M5 EVENING-STAR Londres-abertura stoch_virando=0", "par": "EURJPY", "tf": 5, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "EVENING-STAR"
+                            and i["sessao"] == "Londres-abertura"
                             and i["stoch_virando"] == 0),
+    },
+    {
+        "nome": "GBPUSD M5 PDV-S2 NY-abertura stoch=1", "par": "GBPUSD", "tf": 5, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S2"
+                            and i["sessao"] == "NY-abertura"
+                            and i["stoch_extremo"] == 1),
+    },
+    {
+        "nome": "USDJPY M5 PDV-S1 Ásia", "par": "USDJPY", "tf": 5, "nivel": 1,
+        "check": lambda i: (i["sinal"] == "PDV-S1"
+                            and i["sessao"] == "Asia"),
     },
     # ── M1 ───────────────────────────────────────────────────────────────────
     {
