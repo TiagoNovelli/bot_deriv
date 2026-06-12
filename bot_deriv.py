@@ -51,7 +51,7 @@ DEMO_MODE = os.environ.get("MODO", "DEMO").upper() == "DEMO"
 
 WS_ENDPOINT = f"wss://ws.binaryws.com/websockets/v3?app_id={APP_ID}"
 
-GRANULARITY = {1: 60, 5: 300, 15: 900, 30: 1800, 60: 3600}
+GRANULARITY = {1: 60, 5: 300, 15: 900, 30: 1800, 60: 3600, 240: 14400}
 
 # Mapeamento par → símbolo Deriv (frx = forex)
 SYMBOL = {
@@ -74,7 +74,9 @@ ALVOS = [
     # M1
     ("EURGBP",  1), ("EURUSD",  1), ("EURJPY",  1), ("USDJPY",  1), ("GBPUSD",  1),
     # H1 — exclusivo Deriv
-    ("EURJPY", 60), ("USDJPY", 60),
+    ("EURGBP", 60), ("EURUSD", 60), ("EURJPY", 60), ("USDJPY", 60), ("GBPUSD", 60),
+    # H4 — exclusivo Deriv
+    ("EURUSD", 240), ("EURJPY", 240), ("USDJPY", 240),
 ]
 
 # ── Regras confirmadas (sem DNC-RSI+VOL — depende de volume) ─────────────────
@@ -244,16 +246,71 @@ REGRAS = [
                             and i["stoch_extremo"] == 0),
     },
     # ── H1 — exclusivo Deriv ──────────────────────────────────────────────────
+    # Walk-forward 2019-2025, break-even 54.9%
     {
-        "nome": "EURJPY H1 ENGOLFO-BAIXA Ásia", "par": "EURJPY", "tf": 60, "nivel": 1,
+        "nome": "USDJPY H1 MORNING-STAR Ásia macd=0", "par": "USDJPY", "tf": 60, "nivel": 2,
+        "check": lambda i: (i["padrao"] == "MORNING-STAR"
+                            and i["sessao"] == "Asia"
+                            and i["macd_confirmado"] == 0),
+    },
+    {
+        "nome": "EURJPY H1 ENGOLFO-BAIXA Ásia ema50=1", "par": "EURJPY", "tf": 60, "nivel": 1,
         "check": lambda i: (i["padrao"] == "ENGOLFO-BAIXA"
+                            and i["sessao"] == "Asia"
+                            and i["extremo_ema50"] == 1),
+    },
+    {
+        "nome": "USDJPY H1 EVENING-STAR Londres-abertura bb=0", "par": "USDJPY", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "EVENING-STAR"
+                            and i["sessao"] == "Londres-abertura"
+                            and i["bb_extremo"] == 0),
+    },
+    {
+        "nome": "USDJPY H1 HARAMI-ALTA NY", "par": "USDJPY", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "HARAMI-ALTA"
+                            and i["sessao"] == "NY"),
+    },
+    {
+        "nome": "EURUSD H1 TRESCORVOS Ásia macd=0", "par": "EURUSD", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESCORVOS"
+                            and i["sessao"] == "Asia"
+                            and i["macd_confirmado"] == 0),
+    },
+    {
+        "nome": "GBPUSD H1 HARAMI-ALTA Ásia macd=0", "par": "GBPUSD", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "HARAMI-ALTA"
+                            and i["sessao"] == "Asia"
+                            and i["macd_confirmado"] == 0),
+    },
+    {
+        "nome": "EURJPY H1 TRESSOLDADOS Ásia", "par": "EURJPY", "tf": 60, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESSOLDADOS"
                             and i["sessao"] == "Asia"),
     },
     {
-        "nome": "USDJPY H1 MORNING-STAR Ásia stoch=0", "par": "USDJPY", "tf": 60, "nivel": 1,
+        "nome": "EURGBP H1 MORNING-STAR Ásia macd=0", "par": "EURGBP", "tf": 60, "nivel": 1,
         "check": lambda i: (i["padrao"] == "MORNING-STAR"
                             and i["sessao"] == "Asia"
-                            and i["stoch_extremo"] == 0),
+                            and i["macd_confirmado"] == 0),
+    },
+    # ── H4 — exclusivo Deriv ──────────────────────────────────────────────────
+    # Walk-forward 2019-2025, break-even 54.9%
+    {
+        "nome": "USDJPY H4 MORNING-STAR Ásia ema50=0", "par": "USDJPY", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "MORNING-STAR"
+                            and i["sessao"] == "Asia"
+                            and i["extremo_ema50"] == 0),
+    },
+    {
+        "nome": "EURJPY H4 EVENING-STAR Ásia stoch_virando=0", "par": "EURJPY", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "EVENING-STAR"
+                            and i["sessao"] == "Asia"
+                            and i["stoch_virando"] == 0),
+    },
+    {
+        "nome": "EURUSD H4 TRESCORVOS Ásia", "par": "EURUSD", "tf": 240, "nivel": 1,
+        "check": lambda i: (i["padrao"] == "TRESCORVOS"
+                            and i["sessao"] == "Asia"),
     },
 ]
 
